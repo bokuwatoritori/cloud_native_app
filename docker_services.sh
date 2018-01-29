@@ -38,26 +38,26 @@ else
 	ENVOPT="-e HOST=$(docker-machine ls | head -2 | grep -v NAME | awk '{print $5}' | sed 's#tcp://##' | sed 's#:2376##') -e PORT=8080"
 fi
 
-docker ps | grep visualizer > /dev/null 2>&1
+docker $PROXY ps | grep visualizer > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    docker ps -a | grep visualizer && docker rm visualizer
-    docker run -it -d -p 8080:8080 $ENVOPT -v /var/run/docker.sock:/var/run/docker.sock --name visualizer dockersamples/visualizer
+    docker $PROXY ps -a | grep visualizer && docker rm visualizer
+    docker $PROXY run -it -d -p 8080:8080 $ENVOPT -v /var/run/docker.sock:/var/run/docker.sock --name visualizer dockersamples/visualizer
 fi
 
 # Build images if not done yet
 for a in web i b p s w w1 w2 db; do
-	img=`docker images | grep -E "^cloudnativeapp_$a "`
+	img=`docker $PROXY images | grep -E "^cloudnativeapp_$a "`
 	if [ _"$img" = _"" ]; then
-		docker-compose build
+		docker-compose $PROXY build
 	fi
 done
 
 # Push images in Registry if not done yet
 for a in web i b p s w w1 w2 db; do
-	img=`docker images | grep -E "^$REGISTRY/cloudnativeapp_$a "`
+	img=`docker $PROXY images | grep -E "^$REGISTRY/cloudnativeapp_$a "`
 	if [ _"$img" = _"" ]; then
-		docker tag cloudnativeapp_$a $REGISTRY/cloudnativeapp_$a
-		docker push $REGISTRY/cloudnativeapp_$a
+		docker $PROXY tag cloudnativeapp_$a $REGISTRY/cloudnativeapp_$a
+		docker $PROXY push $REGISTRY/cloudnativeapp_$a
 	fi
 done
 
@@ -79,6 +79,6 @@ done
 #	fi
 #done
 
-docker stack deploy -c docker-compose-v3.yml cna
+docker $PROXY stack deploy -c docker-compose-v3.yml cna
 sleep 5
-docker service ls
+docker $PROXY  service ls

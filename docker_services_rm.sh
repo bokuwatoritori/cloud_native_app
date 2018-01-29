@@ -33,6 +33,6 @@
 #    docker network rm cnalan
 #fi
 
-docker stack rm cna
+docker $PROXY stack rm cna
 sleep 5
-docker service ls
+docker $PROXY service ls
